@@ -171,10 +171,12 @@ Root-Is-Purelib: {}
         self,
         extra_headers,
         description,
+        description_content_type,
         classifiers,
         python_requires,
         requires,
         extra_requires,
+        summary,
     ):
         """Write METADATA file to the distribution."""
         # https://www.python.org/dev/peps/pep-0566/
@@ -183,11 +185,15 @@ Root-Is-Purelib: {}
         metadata.append("Metadata-Version: 2.1")
         metadata.append("Name: %s" % self._name)
         metadata.append("Version: %s" % self._version)
+        if description_content_type:
+            metadata.append("Description-Content-Type: %s" % description_content_type)
         metadata.extend(extra_headers)
         for classifier in classifiers:
             metadata.append("Classifier: %s" % classifier)
         if python_requires:
             metadata.append("Requires-Python: %s" % python_requires)
+        if summary:
+            metadata.append("Summary: %s" % summary)
         for requirement in requires:
             metadata.append("Requires-Dist: %s" % requirement)
 
@@ -324,7 +330,13 @@ def parse_args() -> argparse.Namespace:
         "--python_requires", help="Version of python that the wheel will work with"
     )
     wheel_group.add_argument(
+        "--summary", help="A one-line summary of what the package does"
+    )
+    wheel_group.add_argument(
         "--description_file", help="Path to the file with package description"
+    )
+    wheel_group.add_argument(
+        "--description_content_type", help="Content type of the package description"
     )
     wheel_group.add_argument(
         "--entry_points_file",
@@ -429,6 +441,7 @@ def main() -> None:
                     arguments.description_file, "rt", encoding="utf-8"
                 ) as description_file:
                     description = description_file.read()
+        description_content_type = arguments.description_content_type
 
         extra_requires = collections.defaultdict(list)
         if arguments.extra_requires:
@@ -439,14 +452,17 @@ def main() -> None:
         python_requires = arguments.python_requires or ""
         requires = arguments.requires or []
         extra_headers = arguments.header or []
+        summary = arguments.summary
 
         maker.add_metadata(
             extra_headers=extra_headers,
             description=description,
+            description_content_type=description_content_type,
             classifiers=classifiers,
             python_requires=python_requires,
             requires=requires,
             extra_requires=extra_requires,
+            summary=summary,
         )
 
         if arguments.entry_points_file:

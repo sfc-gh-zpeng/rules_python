@@ -221,6 +221,12 @@ def _py_wheel_impl(ctx):
         args.add("--description_file", description_file)
         other_inputs.append(description_file)
 
+    if ctx.attr.summary:
+        args.add("--summary", ctx.attr.summary)
+
+    if ctx.attr.description_content_type:
+        args.add("--description_content_type", ctx.attr.description_content_type)
+
     ctx.actions.run(
         inputs = depset(direct = other_inputs, transitive = [inputs_to_package]),
         outputs = [outfile, name_file],
@@ -352,6 +358,10 @@ _other_attrs = {
     "classifiers": attr.string_list(
         doc = "A list of strings describing the categories for the package. For valid classifiers see https://pypi.org/classifiers",
     ),
+    "description_content_type": attr.string(
+        doc = "The type of contents in description_file. See https://packaging.python.org/en/latest/specifications/core-metadata/#description-content-type",
+        default = "",
+    ),
     "description_file": attr.label(
         doc = "A file containing text describing the package in a single line.",
         allow_single_file = True,
@@ -376,6 +386,10 @@ _other_attrs = {
     "strip_path_prefixes": attr.string_list(
         default = [],
         doc = "path prefixes to strip from files added to the generated package",
+    ),
+    "summary": attr.string(
+        doc = "A one-line summary of what the package does",
+        default = "",
     ),
 }
 
